@@ -1,0 +1,12 @@
+boto3
+botocore[crt]
+awscrt
+fastapi
+mangum
+uvicorn
+pypdf
+chromadb==0.5.0
+langchain
+langchain-aws
+langchain-community
+langchain-text-splitters

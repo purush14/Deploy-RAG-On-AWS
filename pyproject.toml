@@ -1,0 +1,22 @@
+[project]
+name = "deploy-rag-on-aws"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "boto3",
+    "awscrt",
+    "botocore[crt]",
+    "fastapi",
+    "mangum",
+    "uvicorn",
+    "pypdf",
+    "chromadb==0.5.3",
+    "numpy<2.0",
+    "onnxruntime==1.21.0",
+    "langchain",
+    "langchain-aws",
+    "langchain-community",
+    "langchain-text-splitters",
+]
