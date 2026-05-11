@@ -8,5 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
-src/data/chroma/
-data/chroma/chroma.sqlite3
+image/src/data/chroma/
+src/data/chroma/chroma.sqlite3
+image/src/.env

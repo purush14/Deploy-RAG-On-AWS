@@ -6,11 +6,11 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from langchain_community.vectorstores import Chroma
 
-from src.rag_app.get_embedding_function import get_embedding_function
+from image.src.rag_app.get_embedding_function import get_embedding_function
 
 
-CHROMA_PATH = "src/data/chroma"
-DATA_SOURCE_PATH = "src/data/source"
+CHROMA_PATH = "image/src/data/chroma"
+DATA_SOURCE_PATH = "image/src/data/source"
 
 
 def main():

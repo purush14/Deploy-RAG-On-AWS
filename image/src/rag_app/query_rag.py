@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import List
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_aws import ChatBedrock
-from src.rag_app.get_chroma_db import get_chroma_db
+from get_chroma_db import get_chroma_db
 
 PROMPT_TEMPLATE = """
 Answer the question based only on the following context:
@@ -34,7 +34,7 @@ def query_rag(query_text: str) -> QueryResponse:
     prompt = prompt_template.format(context=context_text, question=query_text)
     print(prompt)
 
-    model = ChatBedrock(model_id=BEDROCK_MODEL_ID)
+    model = ChatBedrock(model_id=BEDROCK_MODEL_ID, provider="anthropic")
     response = model.invoke(prompt)
     response_text = response.content
 
