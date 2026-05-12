@@ -53,13 +53,22 @@ A Retrieval-Augmented Generation (RAG) application that uses Amazon Bedrock for 
 ## Project Structure
 
 ```
-├── populate_database.py          # Main ingestion script
-├── src/
-│   ├── data/
-│   │   ├── source/               # PDF source documents
-│   │   └── chroma/               # ChromaDB vector store
-│   └── rag_app/
-│       └── get_embedding_function.py  # Bedrock embedding setup
+├── image/                        # Docker/Lambda container
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   └── src/
+│       ├── app_api_handler.py    # FastAPI + Mangum handler
+│       ├── data/chroma/          # ChromaDB vector store
+│       └── rag_app/
+│           ├── get_chroma_db.py
+│           ├── get_embedding_function.py
+│           └── query_rag.py
+├── infra/                        # AWS CDK infrastructure
+│   ├── app.py                    # CDK app entry point
+│   ├── cdk.json
+│   ├── requirements.txt
+│   └── stacks/
+│       └── rag_stack.py          # Lambda + API Gateway + ECR
 ├── pyproject.toml
 └── requirements.txt
 ```

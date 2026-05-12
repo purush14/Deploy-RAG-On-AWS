@@ -4,7 +4,7 @@ from mangum import Mangum
 from pydantic import BaseModel
 from query_rag import QueryResponse, query_rag
 
-app = FastAPI()
+app = FastAPI(root_path="/prod")
 handler = Mangum(app)  # Entry point for AWS Lambda.
 
 

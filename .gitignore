@@ -11,3 +11,4 @@ wheels/
 image/src/data/chroma/
 src/data/chroma/chroma.sqlite3
 image/src/.env
+infra/cdk.out

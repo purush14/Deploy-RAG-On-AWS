@@ -20,3 +20,6 @@ ENV PYTHONPATH="${LAMBDA_TASK_ROOT}/rag_app:${PYTHONPATH}"
 COPY src/* ${LAMBDA_TASK_ROOT}
 COPY src/rag_app ${LAMBDA_TASK_ROOT}/rag_app
 COPY src/data/chroma ${LAMBDA_TASK_ROOT}/data/chroma
+
+# Lambda handler — points to the Mangum handler in app_api_handler.py
+CMD ["app_api_handler.handler"]
