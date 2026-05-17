@@ -26,7 +26,7 @@ A Retrieval-Augmented Generation (RAG) application deployed on AWS using Lambda,
                                     │
                                     ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│                         AWS Cloud (eu-west-1)                    │
+│                             AWS Cloud                            │
 │                                                                  |
 │  ┌─────────────────────┐         ┌─────────────────────────┐     │
 │  │   API Gateway       │         │   Lambda (Docker)       │     │
@@ -38,7 +38,7 @@ A Retrieval-Augmented Generation (RAG) application deployed on AWS using Lambda,
 │                          ▼                    ▼            ▼     │
 │  ┌─────────────────────┐  ┌───────────────────┐  ┌──────────┐    │
 │  │   DynamoDB          │  │   Bedrock Runtime │  │   ECR    │    │
-│  │   (rag-queries)     │  │   (Claude + Titan)│  │  (Image) │    │
+│  │   (rag-queries)     │  │                   │  │  (Image) │    │
 │  │   Pay-per-request   │  │                   │  │          │    │
 │  └─────────────────────┘  └───────────────────┘  └──────────┘    │
 │                                                                  │
