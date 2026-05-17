@@ -5,48 +5,44 @@ A Retrieval-Augmented Generation (RAG) application deployed on AWS using Lambda,
 ## High-Level Architecture
 
 ```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                              Frontend                                         │
-│                                                                              │
-│  ┌─────────────────────────────────────────────────────────────────────┐     │
-│  │              GitHub Pages (Static Chat UI)                           │     │
-│  │              https://username.github.io                              │     │
-│  └──────────────────────────────────┬──────────────────────────────────┘     │
-│                                     │                                        │
-└─────────────────────────────────────┼────────────────────────────────────────┘
-                                      │ HTTPS
-                                      ▼
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                              AWS Cloud (eu-west-1)                            │
-│                                                                              │
-│  ┌─────────────────────────────────────────────────────────────────────┐     │
-│  │                    API Gateway (REST, Edge)                          │     │
-│  │                    /prod/submit_query  (POST)                        │     │
-│  │                    /prod/get_query/{id} (GET)                        │     │
-│  │                    /prod/docs          (Swagger UI)                  │     │
-│  └──────────────────────────────────┬──────────────────────────────────┘     │
-│                                     │                                        │
-│                                     ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────┐     │
-│  │                 Lambda (Docker Image, x86_64)                        │     │
-│  │                 FastAPI + Mangum                                     │     │
-│  │                                                                     │     │
-│  │  ┌───────────┐    ┌──────────────┐    ┌─────────────────────────┐  │     │
-│  │  │ ChromaDB  │    │ query_rag.py │    │ get_embedding_function  │  │     │
-│  │  │ (vectors) │◀──▶│ (RAG logic)  │───▶│ (Bedrock Titan v2)      │  │     │
-│  │  └───────────┘    └──────┬───────┘    └─────────────────────────┘  │     │
-│  │                          │                                          │     │
-│  └──────────────────────────┼──────────────────────────────────────────┘     │
-│                             │                                                │
-│              ┌──────────────┼──────────────────┐                             │
-│              ▼              ▼                   ▼                             │
-│  ┌────────────────┐  ┌───────────────┐  ┌──────────────────┐                │
-│  │   DynamoDB     │  │   Bedrock     │  │      ECR         │                │
-│  │  (rag-queries) │  │  (Claude +    │  │  (Docker Image)  │                │
-│  │  Pay-per-req   │  │   Titan v2)   │  │                  │                │
-│  └────────────────┘  └───────────────┘  └──────────────────┘                │
-│                                                                              │
-└──────────────────────────────────────────────────────────────────────────────┘
+┌──────────────┐      ┌──────────────────┐      ┌──────────────────┐
+│              │      │                  │      │                  │
+│  PDF Source  │─────▶│  Document Loader │─────▶│  Text Splitter   │
+│  Documents   │      │  (PyPDF)         │      │  (Recursive)     │
+│              │      │                  │      │                  │
+└──────────────┘      └──────────────────┘      └────────┬─────────┘
+                                                         │
+                                                         ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                        Embedding & Storage                        │
+│                                                                  │
+│  ┌─────────────────────┐         ┌─────────────────────────┐    │
+│  │   Amazon Bedrock    │         │      ChromaDB            │    │
+│  │   (Titan Embed v2)  │────────▶│   (Local Vector Store)  │    │
+│  │                     │         │                         │    │
+│  └─────────────────────┘         └─────────────────────────┘    │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                         AWS Cloud (eu-west-1)                     │
+│                                                                  │
+│  ┌─────────────────────┐         ┌─────────────────────────┐    │
+│  │   API Gateway       │         │   Lambda (Docker)        │    │
+│  │   (REST, Edge)      │────────▶│   FastAPI + Mangum       │    │
+│  │                     │         │                         │    │
+│  └─────────────────────┘         └────────────┬────────────┘    │
+│                                               │                  │
+│                          ┌────────────────────┼────────────┐     │
+│                          ▼                    ▼            ▼     │
+│  ┌─────────────────────┐  ┌───────────────────┐  ┌──────────┐  │
+│  │   DynamoDB          │  │   Bedrock Runtime  │  │   ECR    │  │
+│  │   (rag-queries)     │  │   (Claude + Titan) │  │  (Image) │  │
+│  │   Pay-per-request   │  │                   │  │          │  │
+│  └─────────────────────┘  └───────────────────┘  └──────────┘  │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ## Data Flow
@@ -72,10 +68,8 @@ A Retrieval-Augmented Generation (RAG) application deployed on AWS using Lambda,
 ├── image/                        # Docker/Lambda container
 │   ├── Dockerfile
 │   ├── requirements.txt
-│   ├── .containerignore
 │   └── src/
 │       ├── app_api_handler.py    # FastAPI + Mangum + DynamoDB
-│       ├── .env                  # Local env vars
 │       ├── data/chroma/          # ChromaDB vector store
 │       └── rag_app/
 │           ├── get_chroma_db.py
@@ -85,10 +79,8 @@ A Retrieval-Augmented Generation (RAG) application deployed on AWS using Lambda,
 │   ├── app.py                    # CDK app entry point
 │   ├── cdk.json
 │   ├── pyproject.toml
-│   ├── requirements.txt
 │   └── stacks/
 │       └── rag_stack.py          # Lambda + API GW + DynamoDB + ECR
-├── frontend/                     # Chat UI (GitHub Pages)
 ├── pyproject.toml
 └── README.md
 ```
