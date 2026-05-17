@@ -2,10 +2,12 @@ from aws_cdk import (
     Stack,
     Duration,
     CfnOutput,
+    RemovalPolicy,
     aws_lambda as _lambda,
     aws_apigateway as apigw,
     aws_iam as iam,
     aws_ecr_assets as ecr_assets,
+    aws_dynamodb as dynamodb,
 )
 from constructs import Construct
 import os
@@ -15,6 +17,18 @@ class RagStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        # DynamoDB table for storing queries (pay-per-request)
+        queries_table = dynamodb.Table(
+            self,
+            "QueriesTable",
+            table_name="rag-queries",
+            partition_key=dynamodb.Attribute(
+                name="query_id", type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.DESTROY,
+        )
 
         # Lambda function — CDK builds and pushes the image automatically
         rag_function = _lambda.DockerImageFunction(
@@ -31,8 +45,12 @@ class RagStack(Stack):
             environment={
                 "IS_USING_IMAGE_RUNTIME": "True",
                 "CHROMA_PATH": "data/chroma",
+                "QUERIES_TABLE_NAME": queries_table.table_name,
             },
         )
+
+        # Grant DynamoDB access to the Lambda function
+        queries_table.grant_read_write_data(rag_function)
 
         # Grant Bedrock access to the Lambda function
         rag_function.add_to_role_policy(
